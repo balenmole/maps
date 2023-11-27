@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Xixón ye Rural</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<link rel="dns-prefetch" href="https://tms-pnoa-ma.ign.es/1.0.0/pnoa-ma">
+	<link rel="dns-prefetch preconnect" href="https://unpkg.com" />
+	
+	<style>@import 'https://www.xixonyerural.es/leaflet/leaflet-elevation/libs/fullpage.css';</style>
+
+	<!-- leaflet-ui -->
+	<link rel="stylesheet" href="https://www.xixonyerural.es/leaflet/leaflet-ui/dist/leaflet-ui.css" />
+	<script src="https://www.xixonyerural.es/leaflet/leaflet/dist/leaflet.js"></script>
+  	<script src="https://www.xixonyerural.es/leaflet/leaflet-ui/dist/leaflet-ui.js"></script>
+  	
+  	<!-- leaflet-elevation -->
+	<link rel="stylesheet" href="https://www.xixonyerural.es/leaflet/leaflet-elevation/dist/leaflet-elevation.min.css" />
+	<script src="https://www.xixonyerural.es/leaflet/leaflet-elevation/src/index.js"></script>
+	<script src="https://www.xixonyerural.es/leaflet/leaflet-elevation/libs/leaflet-gpxgroup.js"></script>
+	<script src="https://www.xixonyerural.es/leaflet/leaflet-elevation/dist/leaflet-elevation.min.js"></script>  
+	
+	<!-- leaflet-gpx -->
+	<script src="https://www.xixonyerural.es/leaflet/leaflet-gpx/dist/gpx.js"></script>	
+
+	<style>
+		.leaflet-right .leaflet-control-layers-list {
+			max-width: 250px;
+			max-height: 35vh;
+			overflow: auto;
+		}
+
+		.chart-placeholder {
+			min-height: 20px;
+			text-align: center;
+			font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif;
+			font-style: italic;
+			opacity: 0.6;
+			font-size: 0.9rem;
+		}
+		
+		.elevation-detached.elevation-collapsed .elevation-toggle-icon {
+			top: 1.5em;
+		}
+		
+		.leaflet-control-locate.active a .leaflet-control-locate-location-arrow {
+	          background-color:#fc8428
+        }
+	        
+		.leaflet-control-layers-inline .leaflet-control-layers-base span {
+		  display:inline-block;
+		  padding:6.5px;
+		  font-size:15px;
+		  font-weight:600
+		}
+		
+		.leaflet-control-locate a .leaflet-control-locate-location-arrow {
+          -webkit-mask-image: url(https://unpkg.com/leaflet-ui@0.6.0/dist/images/leaflet.locatecontrollocation-arrow-solid.svg);
+          -moz-mask-image: url(https://unpkg.com/leaflet-ui@0.6.0/dist/images/leaflet.locatecontrollocation-arrow-solid.svg);
+          mask-image: url(https://unpkg.com/leaflet-ui@0.6.0/dist/images/leaflet.locatecontrollocation-arrow-solid.svg);
+        }
+        
+    	.leaflet-tooltip {
+			font-weight: 700;
+		}      
+		
+            .elevation-summary.inline-block-summary {
+			margin: 0;
+			white-space: nowrap;
+			font-size: 1em;
+			text-align: left;
+		}
+		
+		.elevation-summary > :not(.totlen, .minele, .maxele, .ascent) {
+        	display: none !important;
+        }
+        
+		.elevation-summary {
+			font-family: Verdana, Arial, Helvetica, sans-serif;
+			font-size: 12px;
+			font-weight: 600;
+			padding: 0.5em 0em 0.5em;
+		}   
+		
+		.downloadLink
+		
+	</style>
+	
+	<!-- Custom theme -->
+
+	<style>
+		.custom-theme.elevation-control .background {
+  			background-color: #f4f2ea;
+			fill: #f4f2ea;
+			fill-opacity: 0.85;
+		}
+
+		.custom-theme.elevation-control .axis line,
+		.custom-theme.elevation-control .axis path {
+		        stroke: #2D1130;
+ 		}
+
+		.custom-theme.elevation-control .area {
+			fill: #dbd7be;  /* fallback color */
+			fill-opacity: 0.75;
+			stroke: #000;
+			stroke-width: 1;
+		}
+
+		// .custom-theme.elevation-polyline {
+		//	stroke: #F00;
+		//	stroke-opacity: 1;
+		//	stroke-width: 4;
+		// }
+
+		.custom-theme.elevation-polyline-segments {
+		 	stroke: #000;
+			stroke-width: 2;
+			stroke-dasharray: 8;
+		}
+
+		.custom-theme.elevation-control .grid .tick line {
+			stroke: #bebebe;
+			stroke-width: 1px;
+			shape-rendering: crispEdges;
+		}
+
+		.custom-theme.height-focus.circle-lower {
+			fill: #FFF;
+		}
+
+		.custom-theme.elevation-control .axis text,
+		.custom-theme.elevation-control .point text {
+			fill: #000;
+			font-size: 12px;
+		        font-weight: bold;
+		        paint-order: stroke fill;
+		        stroke: #000;
+		        stroke-width: 0px
+	        }   
+
+		.elevation-control .mouse-focus-label-text {
+			fill: #FFF;
+			font-size: 12px;
+		}
+
+		.leaflet-elevation-pane .height-focus-label,
+		.leaflet-overlay-pane .height-focus-label {
+			font-size: 14px;
+			font-weight: 600;
+			fill: #000;
+			paint-order: stroke;
+			stroke: #FFF;
+			stroke-width: 2px;
+		}
+		
+	</style>	
+	
+</head>
+
+<body>
+
+	<div id="map" class="leaflet-map"></div>
+	
+	<script>
+	
+		let mylocale = {
+			"Total Length: " : "Longitud: ",
+			"Min Elevation: " : "Altitud min: ",
+			"Max Elevation: " : "Altitud max: ",
+			"Total Ascent: " : "Ascenso acu: ",
+			"m: " : "%: ",
+			"Altitude" : "Altitud",
+            "Slope" : "Pendiente",
+		};
+
+		L.registerLocale('es', mylocale);
+		L.setLocale('es');
+		
+		let opts = {
+			map: {
+				center: [42.74, -3.02],
+				zoom: 5,
+				mapTypeId: 'topo',
+				mapTypeIds: ['topo', 'satellite'],
+				searchControl: false,
+				loadingControl: false,
+				gestureHandling: false,
+				minimapControl: false,
+				scaleControl: false,
+				pegmanControl: false,
+				locateControl: true,
+				editInOSMControl: false,
+				rotate: "disabled",
+				fullscreenControl: {
+					position: 'bottomright',
+				},
+
+			},
+
+			elevation: {
+				theme: "custom-theme",
+				detached: true,
+				elevationDiv: '#elevation-div',
+				followMarker: true,
+				legend: false,
+				toggle: true,
+				collapsed: true,				
+				time: false,
+				slope: "disabled",
+				summary: "multiline",
+				downloadLink: true,
+			},
+			
+			layersControl: {
+				options: {
+					collapsed: true,
+				},
+			},			
+		};
+
+		let tracks = [
+		    "https://www.xixonyerural.es/maps/Ruta_Peñaferruz_XyR.gpx",
+			"https://www.xixonyerural.es/maps/Ruta_Pinzales-Piñera_XyR.gpx",
+		];
+
+		let map = L.map('map', opts.map);
+
+    	L.control.locate({
+            locateOptions: {
+                maxZoom: 17,
+                enableHighAccuracy: true
+            }
+        })
+
+        map.on('locationfound', function(e) {
+          map.setView(e.latlng, e.zoom);
+        });
+
+        map.on('zoomchange', function() {
+          map.locate({
+            enableHighAccuracy: true
+          });
+        });		
+		
+		let routes;
+
+		map.on('plugins_loaded', function(e) {
+
+			var routes = L.gpxGroup(tracks, {
+				// points: points,
+				// points_options: opts.points,
+				elevation: true,
+				elevation_options: opts.elevation,
+				legend: true,
+				distanceMarkers: false,
+				legend: "trackname",
+				downloadLink: true,
+				legend_options: opts.layersControl,
+			});
+			
+			map.on('eledata_added eledata_clear', ({type}) => {
+				let p = document.querySelector(".chart-placeholder");
+				if (p) {
+					p.style.display = type =='eledata_added' ? 'none' : '';
+				}
+			});
+			
+			routes.addTo(map);
+
+		});
+
+		// Añade logo
+
+		L.Control.Watermark = L.Control.extend({
+		    onAdd: function(map) {
+		        var img = L.DomUtil.create('img');
+
+		        img.src = 'https://www.xixonyerural.es/mapindex/xixonlogo.png';
+		        img.style.width = '94px';
+
+		        return img;
+		    },
+
+		    onRemove: function(map) {
+		        // Nothing to do here
+		    }
+		});
+
+		L.control.watermark = function(opts) {
+		    return new L.Control.Watermark(opts);
+		}
+
+		L.control.watermark({ position: 'topleft' }).addTo(map);		
+		
+	</script>
+	
+</body>
+
+</html>
