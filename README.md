@@ -1,2 +1,2 @@
 # Xixón ye Rural
-<a href="https://balenmole.github.io/maps/">Xixón ye Rural</a>
+<a href="https://balenmole.github.io/maps/newcode.html">Xixón ye Rural</a>
